@@ -81,17 +81,25 @@ for month in range(months):
     furnace_spend = new_online * cost_per_furnace
 
     # Fabricate fixtures
-    fabricated = fixture_fabrication_rate
+    if total_fixtures_fabricated < fixtures_per_furnace * total_furnaces_limit:
+        remaining_needed = fixtures_per_furnace * total_furnaces_limit - total_fixtures_fabricated
+        fabricated = min(fixture_fabrication_rate, remaining_needed)
+    else:
+        fabricated = 0
     available_fixtures += fabricated
     total_fixtures_fabricated += fabricated
     fixture_spend = fabricated * cost_per_fixture
 
     # All online furnaces continue to run in perpetuity
     possible_boards = len(online_furnaces) * fixtures_per_furnace * boards_per_fixture
-    if available_fixtures < len(online_furnaces) * fixtures_per_furnace:
-        limiter = "Fixtures"
-    elif len(online_furnaces) < total_furnaces_limit:
+    if total_fixtures_fabricated >= fixtures_per_furnace * total_furnaces_limit and total_furnaces_brought_up < total_furnaces_limit:
         limiter = "Furnaces"
+    elif total_furnaces_brought_up >= total_furnaces_limit and total_fixtures_fabricated >= fixtures_per_furnace * total_furnaces_limit:
+        limiter = "None"
+    elif available_fixtures >= len(online_furnaces) * fixtures_per_furnace and len(online_furnaces) < total_furnaces_limit:
+        limiter = "Furnaces"
+    elif available_fixtures < len(online_furnaces) * fixtures_per_furnace:
+        limiter = "Fixtures"
     else:
         limiter = "None"
 
